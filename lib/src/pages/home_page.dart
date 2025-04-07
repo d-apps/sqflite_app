@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite_app/src/sql_helper.dart';
 
+import '../models/data_item.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -9,7 +11,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> allData = [];
+  List<DataItem> allData = [];
 
   bool isLoading = true;
 
@@ -25,13 +27,22 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> addData() async {
     isLoading = true;
-    await SQLHelper.createData(titleController.text, descController.text);
+    final item = DataItem(
+      title: titleController.text,
+      desc: descController.text,
+    );
+    await SQLHelper.createData(item);
     await getData();
   }
 
   Future<void> updateData(int id) async {
     isLoading = true;
-    await SQLHelper.updateData(id, titleController.text, descController.text);
+    final item = DataItem(
+      id: id,
+      title: titleController.text,
+      desc: descController.text,
+    );
+    await SQLHelper.updateData(item);
     await getData();
   }
 
@@ -66,14 +77,14 @@ class _HomePageState extends State<HomePage> {
                   final item = allData[index];
 
                   return ListTile(
-                    title: Text(item["title"]),
-                    subtitle: Text(item["desc"]),
+                    title: Text(item.title),
+                    subtitle: Text(item.desc),
                     leading: IconButton(
                       icon: Icon(Icons.edit),
                       onPressed: (){
 
-                        titleController.text = item["title"];
-                        descController.text = item["desc"];
+                        titleController.text = item.title;
+                        descController.text = item.desc;
 
                         showModalBottomSheet(
                             context: context,
@@ -99,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                                   ElevatedButton(
                                       onPressed: (){
                                         updateData(
-                                            item["id"],
+                                            item.id!,
                                         );
                                         Navigator.of(context).pop();
                                       },
@@ -114,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                     trailing: IconButton(
                       icon: Icon(Icons.remove),
                       onPressed: (){
-                        removeItem(item["id"]);
+                        removeItem(item.id!);
                       },
                     ),
                   );
